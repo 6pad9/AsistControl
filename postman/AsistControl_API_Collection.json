@@ -1,0 +1,623 @@
+{
+	"info": {
+		"_postman_id": "asist-control-api-collection",
+		"name": "AsistControl API - Employee Attendance Management",
+		"description": "Colección completa de pruebas para la API REST de AsistControl. Incluye autenticación JWT, gestión de empleados y registro de asistencias con GPS y biometría.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080/api",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "1. Authentication",
+			"item": [
+				{
+					"name": "Login Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('token', jsonData.token);",
+									"    pm.test('Token received', function () {",
+									"        pm.expect(jsonData.token).to.not.be.undefined;",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"admin\",\n    \"password\": \"admin123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					}
+				},
+				{
+					"name": "Login User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"user\",\n    \"password\": \"user123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					}
+				},
+				{
+					"name": "Validate Token",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"token\": \"{{token}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/validate",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"validate"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "2. Employee Management",
+			"item": [
+				{
+					"name": "Get All Employees",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/empleados",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"empleados"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Employee by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/empleados/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"empleados",
+								"1"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Employee by Code",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/empleados/codigo/EMP001",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"empleados",
+								"codigo",
+								"EMP001"
+							]
+						}
+					}
+				},
+				{
+					"name": "Search Employees",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/empleados/buscar?termino=Juan",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"empleados",
+								"buscar"
+							],
+							"query": [
+								{
+									"key": "termino",
+									"value": "Juan"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create New Employee",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('newEmployeeId', jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"codigo\": \"EMP004\",\n    \"nombres\": \"Ana Lucia\",\n    \"apellidos\": \"Fernández Morales\",\n    \"numeroDocumento\": \"98765432\",\n    \"tipoDocumento\": \"DNI\",\n    \"email\": \"ana.fernandez@empresademo.com\",\n    \"telefono\": \"987555666\",\n    \"fechaNacimiento\": \"1992-07-15\",\n    \"fechaIngreso\": \"2023-01-10\",\n    \"cargo\": \"Desarrolladora\",\n    \"departamento\": \"Tecnología\",\n    \"sedeId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/empleados",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"empleados"
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Employee",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"codigo\": \"EMP004\",\n    \"nombres\": \"Ana Lucia\",\n    \"apellidos\": \"Fernández Morales\",\n    \"numeroDocumento\": \"98765432\",\n    \"tipoDocumento\": \"DNI\",\n    \"email\": \"ana.fernandez@empresademo.com\",\n    \"telefono\": \"987555777\",\n    \"fechaNacimiento\": \"1992-07-15\",\n    \"fechaIngreso\": \"2023-01-10\",\n    \"cargo\": \"Desarrolladora Senior\",\n    \"departamento\": \"Tecnología\",\n    \"sedeId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/empleados/{{newEmployeeId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"empleados",
+								"{{newEmployeeId}}"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "3. Attendance Management",
+			"item": [
+				{
+					"name": "Register Entry - GPS + Biometric",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('attendanceId', jsonData.id);",
+									"    pm.test('Entry registered successfully', function () {",
+									"        pm.expect(jsonData.tipoRegistro).to.eql('ENTRADA');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"empleadoCodigo\": \"EMP001\",\n    \"tipoRegistro\": \"ENTRADA\",\n    \"latitud\": -12.0464,\n    \"longitud\": -77.0428,\n    \"huellaDigital\": \"U2FsdGVkX1+E4dYEczY8EnCwQPhMTqjCzQGFJJGNpbI=\",\n    \"fotoRegistro\": \"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==\",\n    \"dispositivo\": \"Mobile App v1.0\",\n    \"observaciones\": \"Entrada registrada desde app móvil\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/asistencias/registrar",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"asistencias",
+								"registrar"
+							]
+						}
+					}
+				},
+				{
+					"name": "Register Exit - GPS + Biometric",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"empleadoCodigo\": \"EMP001\",\n    \"tipoRegistro\": \"SALIDA\",\n    \"latitud\": -12.0464,\n    \"longitud\": -77.0428,\n    \"huellaDigital\": \"U2FsdGVkX1+E4dYEczY8EnCwQPhMTqjCzQGFJJGNpbI=\",\n    \"fotoRegistro\": \"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==\",\n    \"dispositivo\": \"Mobile App v1.0\",\n    \"observaciones\": \"Salida registrada desde app móvil\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/asistencias/registrar",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"asistencias",
+								"registrar"
+							]
+						}
+					}
+				},
+				{
+					"name": "Register Outside Geofence (Invalid)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"empleadoCodigo\": \"EMP002\",\n    \"tipoRegistro\": \"ENTRADA\",\n    \"latitud\": -12.1000,\n    \"longitud\": -77.1000,\n    \"huellaDigital\": \"U2FsdGVkX19QdGZlYXNlIGVuY29kZSB0aGlzIHRleHQ=\",\n    \"dispositivo\": \"Mobile App v1.0\",\n    \"observaciones\": \"Registro desde ubicación remota\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/asistencias/registrar",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"asistencias",
+								"registrar"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get All Attendances",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/asistencias",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"asistencias"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Attendance by Employee",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/asistencias/empleado/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"asistencias",
+								"empleado",
+								"1"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Today's Attendances",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/asistencias/hoy",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"asistencias",
+								"hoy"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Pending Validations",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/asistencias/pendientes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"asistencias",
+								"pendientes"
+							]
+						}
+					}
+				},
+				{
+					"name": "Validate Attendance",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/asistencias/{{attendanceId}}/validar?validar=true&observaciones=Validado manualmente por supervisor",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"asistencias",
+								"{{attendanceId}}",
+								"validar"
+							],
+							"query": [
+								{
+									"key": "validar",
+									"value": "true"
+								},
+								{
+									"key": "observaciones",
+									"value": "Validado manualmente por supervisor"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "4. Error Scenarios",
+			"item": [
+				{
+					"name": "Invalid Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"admin\",\n    \"password\": \"wrongpassword\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					}
+				},
+				{
+					"name": "Employee Not Found",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/empleados/999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"empleados",
+								"999"
+							]
+						}
+					}
+				},
+				{
+					"name": "Duplicate Employee Code",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"codigo\": \"EMP001\",\n    \"nombres\": \"Duplicate\",\n    \"apellidos\": \"Employee\",\n    \"numeroDocumento\": \"99999999\",\n    \"sedeId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/empleados",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"empleados"
+							]
+						}
+					}
+				},
+				{
+					"name": "Invalid Employee Code for Attendance",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"empleadoCodigo\": \"INVALID001\",\n    \"tipoRegistro\": \"ENTRADA\",\n    \"latitud\": -12.0464,\n    \"longitud\": -77.0428\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/asistencias/registrar",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"asistencias",
+								"registrar"
+							]
+						}
+					}
+				}
+			]
+		}
+	]
+}
